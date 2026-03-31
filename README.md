@@ -94,12 +94,15 @@ cp .env.example .env
 nano .env  # set PIHOLE_PASSWORD to something secure
 ```
 
-### 3. Install the macvlan setup script
+### 3. Install the macvlan setup scripts
 
 ```bash
 sudo cp pi-vlan.sh /usr/local/bin/pi-vlan.sh
-sudo chmod +x /usr/local/bin/pi-vlan.sh
+sudo cp persist-macvlan-sysctl.sh /usr/local/bin/persist-macvlan-sysctl.sh
+sudo chmod +x /usr/local/bin/pi-vlan.sh /usr/local/bin/persist-macvlan-sysctl.sh
 ```
+
+`pi-vlan.sh` calls `persist-macvlan-sysctl.sh` automatically after setup to write `/etc/sysctl.d/99-macvlan-shim.conf`, which disables IPv6 autoconf/RA on `macvlan-shim` across reboots. Both scripts must be in the same directory.
 
 ### 4. Install and enable the systemd service
 
