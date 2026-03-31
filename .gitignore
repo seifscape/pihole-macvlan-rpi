@@ -1,0 +1,6 @@
+.env
+etc-pihole/*
+!etc-pihole/custom.list
+etc-dnsmasq.d/
+*.zip
+*.db

@@ -1,0 +1,61 @@
+services:
+  pihole:
+    depends_on:
+      - unbound
+    container_name: pihole-vlan
+    hostname: nebula-pihole
+    image: pihole/pihole:latest
+    mac_address: de:ad:be:ef:00:02
+    cap_add:
+      - NET_ADMIN
+      - SYS_TIME
+      - SYS_NICE
+    networks:
+      pihole_macvlan:
+        ipv4_address: 192.168.1.244
+        ipv6_address: fd00:beef::244
+    dns:
+      - 1.1.1.1  # Cloudflare DNS
+      - 8.8.8.8  # Google DNS
+    environment:
+      - ServerIP=192.168.1.244
+      - VIRTUAL_HOST=nebula-pihole.local.lan
+      - TZ=America/New_York
+      - WEBPASSWORD=${PIHOLE_PASSWORD}
+      - FTLCONF_LISTENINGMODE=single
+      - FTLCONF_IPV6=true
+      - PIHOLE_DNS_=unbound #192.168.1.245#5335
+    volumes:
+      - ./etc-pihole:/etc/pihole
+      - ./etc-dnsmasq.d:/etc/dnsmasq.d
+    restart: unless-stopped
+
+  unbound:
+    container_name: unbound
+    image: klutchell/unbound:latest
+    cap_add:
+      - NET_ADMIN
+    networks:
+      pihole_macvlan:
+        ipv4_address: 192.168.1.245
+        ipv6_address: fd00:beef::245
+    healthcheck:
+      test: ['CMD', 'drill', '@192.168.1.245', 'example.com']
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 30s
+    dns:
+      - 1.1.1.1  # Cloudflare DNS
+      - 8.8.8.8  # Google DNS
+    volumes:
+      - ./unbound.d:/etc/unbound/custom.conf.d
+    ports:
+      - 5335:5335/udp
+      - 5335:5335/tcp
+    restart: unless-stopped
+
+networks:
+  pihole_macvlan:
+    external: true
+    enable_ipv6: true

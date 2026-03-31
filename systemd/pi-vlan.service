@@ -1,0 +1,18 @@
+# https://blog.ivansmirnov.name/set-up-pihole-using-docker-macvlan-network/
+# sudo systemctl enable pi-vlan
+# sudo systemctl start pi-vlan
+
+[Unit]
+Description=Persistent macvlan network for Pi-hole
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /usr/local/bin/pi-vlan.sh
+RemainAfterExit=yes
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target
