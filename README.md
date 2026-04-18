@@ -104,7 +104,7 @@ sudo cp persist-macvlan-sysctl.sh /usr/local/bin/persist-macvlan-sysctl.sh
 sudo chmod +x /usr/local/bin/pi-vlan.sh /usr/local/bin/persist-macvlan-sysctl.sh
 ```
 
-`pi-vlan.sh` calls `persist-macvlan-sysctl.sh` automatically after setup to write `/etc/sysctl.d/99-macvlan-shim.conf`, which disables IPv6 autoconf/RA on `macvlan-shim` across reboots. Both scripts must be in the same directory.
+`pi-vlan.sh` calls `persist-macvlan-sysctl.sh` automatically after setup to write `/etc/sysctl.d/99-macvlan-shim.conf`, which enables IPv6 autoconf/RA on `macvlan-shim` across reboots. Both scripts must be in the same directory.
 
 ### 4. Install and enable the systemd service
 
