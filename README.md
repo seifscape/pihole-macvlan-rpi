@@ -49,7 +49,9 @@ Add or merge the following (create the file if it doesn't exist):
 ```json
 {
   "ipv6": true,
-  "fixed-cidr-v6": "fd00:d0c::/64"
+  "fixed-cidr-v6": "fd00:beef:2::/64",
+  "experimental": true,
+  "ip6tables": true
 }
 ```
 
