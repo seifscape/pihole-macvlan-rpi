@@ -212,7 +212,7 @@ The `pi-vlan` systemd service runs `pi-vlan.sh` on every boot after `network-onl
 1. Waits for Docker to be ready
 2. Creates the `pihole_macvlan` Docker network (skips if already exists)
 3. Creates the `macvlan-shim` host interface with static IPv4 + IPv6
-4. Disables IPv6 autoconf/RA on the shim (written to `/etc/sysctl.d/99-macvlan-shim.conf`)
+4. Enables IPv6 autoconf/RA on the shim (written to `/etc/sysctl.d/99-macvlan-shim.conf`)
 
 ## Directory Structure
 
