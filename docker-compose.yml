@@ -5,6 +5,7 @@ services:
     container_name: pihole-vlan
     hostname: nebula-pihole
     image: pihole/pihole:latest
+    shm_size: "256mb"
     mac_address: de:ad:be:ef:00:02
     cap_add:
       - NET_ADMIN
