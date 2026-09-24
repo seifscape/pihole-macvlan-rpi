@@ -45,7 +45,7 @@ fi
 
 ip link add macvlan-shim link eth0 type macvlan mode bridge
 ip addr flush dev macvlan-shim
-ip addr add 192.168.1.250/24 dev macvlan-shim
+ip addr add 192.168.1.250/32 dev macvlan-shim
 ip addr add ${IPV6_PREFIX}::250/64 dev macvlan-shim
 ip link set macvlan-shim up
 
@@ -53,9 +53,10 @@ ip link set macvlan-shim up
 sysctl -w net.ipv6.conf.macvlan-shim.autoconf=0
 sysctl -w net.ipv6.conf.macvlan-shim.accept_ra=0
 
-if ! ip route show | grep -q "192.168.1.0/24"; then
-  ip route add 192.168.1.0/24 dev macvlan-shim
-fi
+# Route only the macvlan containers through the shim; all other LAN traffic stays on eth0
+for ip4 in 192.168.1.244 192.168.1.245; do
+  ip route replace "$ip4/32" dev macvlan-shim src 192.168.1.250
+done
 
 if ! ip -6 route show | grep -q "${IPV6_PREFIX}::/64"; then
   ip -6 route add ${IPV6_PREFIX}::/64 dev macvlan-shim

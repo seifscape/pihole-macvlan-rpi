@@ -18,6 +18,15 @@ Self-contained setup for running Pi-hole with Unbound as an upstream DNS resolve
 
 The host shim (`macvlan-shim`) is a virtual interface that lets the Raspberry Pi itself talk to the macvlan containers (macvlan siblings can't talk to each other by default).
 
+The shim gets a single address (`192.168.1.250/32`) and host routes to Pi-hole and Unbound only. All other LAN traffic from the Pi stays on `eth0` with its normal address. Giving the shim the whole `/24` also works, but then every packet the Pi sends to the LAN leaves through the shim as `.250`, which bypasses firewall rules written for `eth0`.
+
+If you run UFW with `deny outgoing`, allow the shim and LAN traffic on `eth0`:
+
+```bash
+sudo ufw allow out on macvlan-shim
+sudo ufw allow out on eth0 to 192.168.1.0/24
+```
+
 ## How It Works
 
 ```
@@ -138,7 +147,7 @@ Edit `etc-pihole/custom.list` with your local hostnames before starting, or add 
 ### Change IPs or subnet
 
 Edit all occurrences of `192.168.1.244`, `192.168.1.245`, `192.168.1.250`, and `fd00:beef` across:
-- `pi-vlan.sh`
+- `pi-vlan.sh` (including the container list in the route loop)
 - `docker-compose.yml`
 - `unbound.d/custom.conf` (access-control lines)
 
@@ -204,6 +213,10 @@ dig AAAA @fd00:beef::244 google.com
 # Check macvlan-shim is up
 ip addr show macvlan-shim
 ip -6 addr show macvlan-shim
+
+# Only the containers should route via the shim
+ip route get 192.168.1.244   # dev macvlan-shim src 192.168.1.250
+ip route get 192.168.1.1     # dev eth0 src <Pi LAN IP>
 ```
 
 ## Reboot Persistence
@@ -211,7 +224,7 @@ ip -6 addr show macvlan-shim
 The `pi-vlan` systemd service runs `pi-vlan.sh` on every boot after `network-online.target`. The script:
 1. Waits for Docker to be ready
 2. Creates the `pihole_macvlan` Docker network (skips if already exists)
-3. Creates the `macvlan-shim` host interface with static IPv4 + IPv6
+3. Creates the `macvlan-shim` host interface (`192.168.1.250/32` + IPv6) with host routes to Pi-hole and Unbound only
 4. Enables IPv6 autoconf/RA on the shim (written to `/etc/sysctl.d/99-macvlan-shim.conf`)
 
 ## Directory Structure
