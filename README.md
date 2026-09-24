@@ -35,7 +35,9 @@ Client → Pi-hole (192.168.1.244:53)
        → Cloudflare DNS-over-TLS (1.1.1.1@853)
 ```
 
-Pi-hole handles ad-blocking and local DNS. Unbound handles recursive resolution with DNSSEC and DNS-over-TLS upstream to Cloudflare.
+Pi-hole handles ad-blocking and local DNS. Unbound forwards queries to Cloudflare over DNS-over-TLS (encrypted in transit), validates DNSSEC and caches answers locally.
+
+Unbound is a forwarder here, not a full recursive resolver, so Cloudflare still sees your queries. To resolve from the root servers yourself instead, remove the `forward-zone` block from `unbound.d/custom.conf`. Queries then go unencrypted to many authoritative servers rather than encrypted to one provider.
 
 ## Prerequisites
 
