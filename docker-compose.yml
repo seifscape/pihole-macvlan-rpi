@@ -16,16 +16,13 @@ services:
         ipv4_address: 192.168.1.244
         ipv6_address: fd00:beef::244
     dns:
-      - 1.1.1.1  # Cloudflare DNS
-      - 8.8.8.8  # Google DNS
+      - 127.0.0.1  # self: use Pi-hole's own resolution instead of leaking to public DNS
+      - ::1
     environment:
-      - ServerIP=192.168.1.244
-      - VIRTUAL_HOST=nebula-pihole.local.lan
       - TZ=America/New_York
       - WEBPASSWORD=${PIHOLE_PASSWORD}
-      - FTLCONF_LISTENINGMODE=single
-      - FTLCONF_IPV6=true
-      - PIHOLE_DNS_=unbound #192.168.1.245#5335
+      # Answer every network, including the router's iot network (172.16.0.0/24). LOCAL would refuse it.
+      - FTLCONF_dns_listeningMode=ALL
     volumes:
       - ./etc-pihole:/etc/pihole
       - ./etc-dnsmasq.d:/etc/dnsmasq.d
@@ -41,7 +38,7 @@ services:
         ipv4_address: 192.168.1.245
         ipv6_address: fd00:beef::245
     healthcheck:
-      test: ['CMD', 'drill', '@192.168.1.245', 'example.com']
+      test: ["CMD", "drill-hc", "@127.0.0.1", "dnssec.works"]
       interval: 30s
       timeout: 30s
       retries: 3
@@ -51,9 +48,6 @@ services:
       - 8.8.8.8  # Google DNS
     volumes:
       - ./unbound.d:/etc/unbound/custom.conf.d
-    ports:
-      - 5335:5335/udp
-      - 5335:5335/tcp
     restart: unless-stopped
 
 networks:
